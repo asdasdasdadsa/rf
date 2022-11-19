@@ -11,7 +11,7 @@ target = digits.target
 
 ddd = dann.dann()
 X = ddd.normaniz(X)
-target = ddd.one_hot_encoding(target)
+# target = ddd.one_hot_encoding(target)
 
 X_train, X_val, X_test, t_train, t_val, t_test = ddd.peremeshat_razd(X, target)
 
@@ -21,9 +21,12 @@ D = 64
 top = []
 random.seed()
 for i in range(30):
-    L_1, L_2, M = np.random.randint(10, 40), np.random.randint(5, 35), np.random.randint(5, 20)
+    # L_1, L_2, M = np.random.randint(10, 40), np.random.randint(5, 35), np.random.randint(5, 20)
+    L_1 = np.random.randint(5, 20)
+    L_2 = np.random.randint(5, 15)
+    M = np.random.randint(3, 12)
 
-    d = rf.DT(3, 0.1, 5, K, M, L_1, L_2)
+    d = rf.DT(3, 0.05, 25, K, M, L_1, L_2)
     print(str(i)+"   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     root = [rf.Node() for l in range(M)]
     for r in root:

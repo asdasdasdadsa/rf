@@ -22,21 +22,27 @@ class DT:
         self.L_2 = L_2
 
     def terminal_node_output(self, cl, dn):
-        def tno(cll, dnn):
-            nn = np.zeros(self.K)
-            for i in range(len(cll)):
-                nn[np.argmax(cll[i])] += 1
-            return nn / len(cll)
+        # def tno(cll, dnn):
+        # nn = np.zeros(self.K)
+        # for i in range(len(cl)):
+        #     nn[np.argmax(cl[i])] += 1
+        # return nn / len(cl)
+        nn = np.zeros(self.K)
+        dd = np.unique(cl, return_counts=True)
+        nn[dd[0]] = dd[1]
+        return nn / len(cl)
 
-        return tno(cl, dn)
+        # return tno(cl, dn)
 
     def entropy(self, cl, dn):
-        z = np.zeros(self.K)
-        for i in range(len(cl)):
-            z[np.argmax(cl[i])] += 1
-        z /= len(dn)
+        # z = np.zeros(self.K)
+        # for i in range(len(cl)):
+        #     z[np.argmax(cl[i])] += 1
+        # z /= len(dn)
+        z = np.unique(cl, return_counts=True)[1] / len(dn)
         log_z = np.log(z)
-        return -np.sum(np.array([z[i] * log_z[i] for i in range(self.K)]))
+        # return -np.sum(np.array([z[i] * log_z[i] for i in range(self.K)]))
+        return - np.sum(np.multiply(z, log_z))
 
     def information_gain(self, cl, dn, dn_j, cl_j):
         I = self.entropy(cl, dn)
@@ -50,19 +56,23 @@ class DT:
         I = np.random.choice(np.arange(64), self.L_1, replace=False)
         for i in I:
             psi = lambda x: x[i]
-            dn_left = []
-            dn_right = []
-            cl_left = []
-            cl_right = []
             J = np.random.uniform(0, 1, self.L_2)
             for j in J:
-                for h in range(len(dn)):
-                    if psi(dn[h]) > j:
-                        dn_left.append(dn[h])
-                        cl_left.append(cl[h])
-                    else:
-                        dn_right.append(dn[h])
-                        cl_right.append(cl[h])
+                # for h in range(len(dn)):
+                #     if psi(dn[h]) > j:
+                #         dn_left.append(dn[h])
+                #         cl_left.append(cl[h])
+                #     else:
+                #         dn_right.append(dn[h])
+                #         cl_right.append(cl[h])
+
+                ind_left = dn[:,i] > j
+                ind_right = ~ind_left
+                dn_left = dn[ind_left]
+                dn_right = dn[ind_right]
+                cl_left = cl[ind_left]
+                cl_right = cl[ind_right]
+
                 if indexxx %10 == 0:
                     print(indexxx)
                 indexxx += 1
@@ -104,18 +114,23 @@ class DT:
     def pass_random_forest(self, node, dn):
         rf = np.zeros(10)
         for i in node:
-            rf += self.pass_tree(i, dn)
+            dddd = self.pass_tree(i, dn)
+            rf += dddd
         return rf/self.M
 
     def accuracy_tree(self, cl, dn, node):
         err = 0
         for i in range(len(dn)):
-            if np.argmax(self.pass_tree(node, dn[i])) == np.argmax(cl[i]):
+            if np.argmax(self.pass_tree(node, dn[i])) == cl[i]: #np.argmax(cl[i]):
                 err += 1
         return err / len(dn)
 
     def accuracy_random_forest(self, cl, dn, node):
         err = 0
-        for i in node:
-            err += self.accuracy_tree(cl, dn, i)
-        return err/self.M
+        for i in range(len(dn)):
+            if np.argmax(self.pass_random_forest(node, dn[i])) == cl[i]: #np.argmax(cl[i]):
+                err += 1
+        return err / len(dn)
+        # for i in node:
+        #     err += self.accuracy_tree(cl, dn, i)
+        # return err/self.M
